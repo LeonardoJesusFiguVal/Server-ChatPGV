@@ -1,7 +1,6 @@
 package org.leonardoJesus;
 
-import com.google.gson.Gson;
-import org.leonardoJesus.models.orders.JsonOrder;
+import org.leonardoJesus.models.requests.JsonOrder;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -47,25 +46,30 @@ public class ChatSocket {
      */
     public static void handleClient(Socket clientSocket) {
         try{
+            System.out.println("Cliente conectado en: "+clientSocket.getInetAddress().getHostAddress());
             //Flujos de entrada y salida del socket
             ObjectOutputStream out = new ObjectOutputStream(clientSocket.getOutputStream());
             ObjectInputStream in = new ObjectInputStream(clientSocket.getInputStream());
 
             //Leemos la peticion, sera en formato json
-            String json = in.readLine();
+            String json = (String) in.readObject();
 
+            System.out.println(json);
 
-            Gson gson = new Gson();
-            JsonOrder order = gson.fromJson(json, JsonOrder.class);
+            //Objeto Gson para convertir entre
+            JsonOrder order = JsonManager.gson.fromJson(json, JsonOrder.class);
 
-            String response = gson.toJson(JsonManager.executeOrder(order));
+            System.out.println(order);
+
+            String response = JsonManager.gson.toJson(JsonManager.executeOrder(order));
+            System.out.println(response);
 
             out.writeObject(response);
 
             out.close();
             in.close();
             clientSocket.close();
-        } catch (IOException e) {
+        } catch (IOException | ClassNotFoundException e) {
             e.printStackTrace();
         }
     }

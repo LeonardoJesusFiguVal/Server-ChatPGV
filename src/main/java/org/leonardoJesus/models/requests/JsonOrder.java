@@ -1,6 +1,8 @@
-package org.leonardoJesus.models.orders;
+package org.leonardoJesus.models.requests;
 
-public class JsonOrder {
+import java.io.Serializable;
+
+public class JsonOrder implements Serializable {
 
     private String command;
     private String params;
@@ -29,5 +31,13 @@ public class JsonOrder {
 
     public void setParams(String params) {
         this.params = params;
+    }
+
+    @Override
+    public String toString() {
+        return "JsonOrder{" +
+                "command='" + command + '\'' +
+                ", params='" + params + '\'' +
+                '}';
     }
 }
