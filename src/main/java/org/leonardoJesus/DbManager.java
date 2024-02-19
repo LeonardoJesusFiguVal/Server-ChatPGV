@@ -1,7 +1,9 @@
 package org.leonardoJesus;
 
+import org.leonardoJesus.models.requests.get.ReqMessages;
 import org.leonardoJesus.models.requests.get.ReqUsers;
 import org.leonardoJesus.models.requests.get.ReqVerification;
+import org.leonardoJesus.models.responces.objects.Message;
 import org.leonardoJesus.models.responces.objects.User;
 
 import java.sql.*;
@@ -129,5 +131,27 @@ public class DbManager {
         }
 
         return userArray;
+    }
+
+    public ArrayList<Message> getMessages(ReqMessages req) {
+        // TODO Implement method "GetMessages"
+        return null;
+    }
+
+    public void updateUser(User user) {
+        // TODO Implement method "UpdateUser"
+    }
+
+    public User getNewUser(String email, String password) {
+        // TODO Implement method "GetNewUser"
+        return null;
+    }
+
+    public void postUser(User user) {
+        // TODO Implement method "PostUser"
+    }
+
+    public void postMessage(Message message) {
+        // TODO Implement method "PostMessage"
     }
 }
