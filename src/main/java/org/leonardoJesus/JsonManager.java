@@ -21,9 +21,9 @@ public class JsonManager {
         System.out.println(order.toString());
 
         switch (order.getCommand()){
-            case "getVerification" -> response = gson.toJson(getVerification(order));
-            case "getChatUsers" -> response = gson.toJson(getChatUsers(order));
-            case "getAllUsers" -> response = gson.toJson(getAllUsers(order));
+            case "getVerification" -> response = getVerification(order);
+            case "getChatUsers" -> response = getChatUsers(order);
+            case "getAllUsers" -> response = getAllUsers(order);
             case "getMessages" -> response = gson.toJson(getMessages(order));
             case "updateUser" -> response = gson.toJson(updateUser(order));
             case "postUser" -> response = gson.toJson(postUser(order));
@@ -34,70 +34,74 @@ public class JsonManager {
     }
 
     //Metodo para ejecutar la orden "getVerification"
-    private static VerifiedUser getVerification(JsonOrder order){
+    private static String getVerification(JsonOrder order){
         ReqVerification req = gson.fromJson(order.getParams(), ReqVerification.class);
 
         DbManager dbManager = new DbManager();
-        User user = dbManager.getVerification(req);
+        String user = dbManager.getVerification(req);
 
-        System.out.println(user.toString());
+        System.out.println(user);
 
         dbManager.closeConnection();
 
-        return new VerifiedUser(user);
+        return user;
     }
 
     //Metodo para ejecutar la orden "getChatUsers"
-    private static UsersList getChatUsers(JsonOrder order){
+    private static String getChatUsers(JsonOrder order){
         ReqUsers req = gson.fromJson(order.getParams(), ReqUsers.class);
 
         DbManager dbManager = new DbManager();
-        UsersList users = new UsersList(dbManager.getChatUsers(req));
+        String users = dbManager.getChatUsers(req);
         dbManager.closeConnection();
 
         return users;
     }
 
     //Metodo para ejecutar la orden "getAllUsers"
-    private static UsersList getAllUsers(JsonOrder order){
+    private static String getAllUsers(JsonOrder order){
         ReqUsers req = gson.fromJson(order.getParams(), ReqUsers.class);
 
         DbManager dbManager = new DbManager();
-        UsersList users = new UsersList(dbManager.getAllUsers(req));
+        String users = dbManager.getAllUsers(req);
         dbManager.closeConnection();
 
         return users;
     }
 
     //Metodo para ejecutar la orden "getMessages"
-    private static MessageList getMessages(JsonOrder order){
+    private static String getMessages(JsonOrder order){
         ReqMessages req = gson.fromJson(order.getParams(), ReqMessages.class);
 
         DbManager dbManager = new DbManager();
-        MessageList messageList = new MessageList(dbManager.getMessages(req));
+        String messageList = dbManager.getMessages(req);
         dbManager.closeConnection();
 
         return messageList;
     }
 
     //Metodo para ejecutar la orden "updateUser"
-    private static User updateUser(JsonOrder order) {
+    private static String updateUser(JsonOrder order) {
         User user = gson.fromJson(order.getParams(), User.class);
 
         DbManager dbManager = new DbManager();
         dbManager.updateUser(user);
+        String newUser = dbManager.getNewUser(user.getEmail(), user.getPassword());
+        dbManager.closeConnection();
 
-        return dbManager.getNewUser(user.getEmail(), user.getPassword());
+        return newUser;
     }
 
     //Metodo para ejecutar la orden "PostUser"
-    private static User postUser(JsonOrder order) {
+    private static String postUser(JsonOrder order) {
         User user = gson.fromJson(order.getParams(), User.class);
 
         DbManager dbManager = new DbManager();
         dbManager.postUser(user);
+        String newUser = dbManager.getNewUser(user.getEmail(), user.getPassword());
+        dbManager.closeConnection();
 
-        return dbManager.getNewUser(user.getEmail(), user.getPassword());
+        return newUser;
     }
 
     //Metodo para ejecutar la orden "PostMessage"

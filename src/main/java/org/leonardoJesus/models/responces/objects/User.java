@@ -58,6 +58,10 @@ public class User implements Serializable {
         this.image = image;
     }
 
+    public void setState(boolean state){
+        this.state = state;
+    }
+
     @Override
     public String toString() {
         return "User{" +

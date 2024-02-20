@@ -35,18 +35,18 @@ public class DbManager {
     /**
      * Metodo que devuelve el usuario que intenta conectarse a la DB, si este existe
      * @param req (ReqVerification) Los parametros que se requieren para hacer la consulta
-     * @return (User) El usuario que intenta entrar en la aplicacción, si no existe devolvera null
+     * @return (String) El usuario que intenta entrar en la aplicacción, si no existe devolvera null
      */
-    public User getVerification(ReqVerification req){
+    public String getVerification(ReqVerification req){
         if (req.getPassword() == null || req.getEmail() == null){
             return null;
         }
 
-        String sqlSentence = "SELECT * FROM users WHERE uemail = ? AND upassword = ?;";
+        String sqlSentence = "SELECT JSON_OBJECT('email', uemail, 'name', uname, 'password', upassword, 'image', uimage ) as 'Json' from users where uemail = ? AND upassword = ?;";
         PreparedStatement sentence = null;
         ResultSet result = null;
 
-        User user = null;
+        String user = null;
 
         if (connection != null){
             try {
@@ -57,10 +57,7 @@ public class DbManager {
                 result = sentence.executeQuery();
 
                 if (result.next()){
-                    String email = result.getString("uemail");
-                    String name = result.getString("uname");
-                    String password = result.getString("upassword");
-                    user = new User(email, name, password, null, false);
+                    user = result.getString("Json");
                 }
 
                 return user;
@@ -76,36 +73,48 @@ public class DbManager {
     /**
      * Metodo para conseguir los usuarios que han participado en un chat con el usuario
      * @param req (ReqUsers) Parametros necesarios para hacer la consulta
-     * @return (ArrayList Users) Con los usuarios con los que se ha iniciado un chat, devolvera null en caso de no haver ninguno
+     * @return (String) Con los usuarios con los que se ha iniciado un chat, devolvera null en caso de no haver ninguno
      */
-    public ArrayList<User> getChatUsers(ReqUsers req){
+    public String getChatUsers(ReqUsers req){
         if (req.getMail() == null){
             return null;
         }
 
-        String sqlSentence = "SELECT * FROM users WHERE uemail IN (SELECT sender From messages WHERE target = ?) OR uemail IN (SELECT target FROM messages WHERE sender = ?);";
+        String sqlSentence = "select convert(COALESCE((select JSON_ARRAYAGG(JSON_OBJECT('email', uemail, 'name', uname, 'password', upassword, 'image', uimage )) FROM users WHERE uemail IN (SELECT sender From messages WHERE target = ?) OR uemail IN (SELECT target FROM messages WHERE sender = ?)), '{[]}'), json) as 'Json';";
+
         return getUser(req, sqlSentence);
     }
 
     /**
      * Metodo para conseguir todos los usuarios con los que no tengas un chat
      * @param req (ReqUsers) Parametros necesarios para realizar la consulta
-     * @return (ArrayList User) Devuelve todos los usuarios con los que no se tenga un chat, de no haver ninguno se devolvera null
+     * @return (String) Devuelve todos los usuarios con los que no se tenga un chat, de no haver ninguno se devolvera null
      */
-    public ArrayList<User> getAllUsers(ReqUsers req){
-        if (req.getMail() != null){
+    public String getAllUsers(ReqUsers req){
+        if (req.getMail() == null){
             return null;
         }
 
-        String sqlSentence = "SELECt * FROM users WHERE uemail NOT IN (SELECT sender From messages WHERE target = 'leo.figueroa2002@gmail.com') AND uemail NOT IN (SELECT target FROM messages WHERE sender = 'leo.figueroa2002@gmail.com') AND uemail != 'leo.figueroa2002@gmail.com';";
+        String sqlSentence = "Select convert(COALESCE((SELECT JSON_ARRAYAGG(\n" +
+                "\tJSON_OBJECT(\n" +
+                "\t\t'email', uemail,\n" +
+                "\t\t'name', uname,\n" +
+                "\t\t'password', upassword,\n" +
+                "\t\t'image', uimage\n" +
+                "\t))\n" +
+                "FROM users \n" +
+                "WHERE uemail NOT IN (SELECT sender From messages WHERE target = ?) \n" +
+                "AND uemail NOT IN (SELECT target FROM messages WHERE sender = ?) \n" +
+                "AND uemail != 'leo.figueroa2002@gmail.com'), '[]'), JSON) AS 'Json';";
+
         return getUser(req, sqlSentence);
     }
 
-    private ArrayList<User> getUser(ReqUsers req, String sql){
+    private String getUser(ReqUsers req, String sql){
         PreparedStatement sentence = null;
         ResultSet result = null;
 
-        ArrayList<User> userArray = null;
+        String userArray = null;
 
         if (connection != null){
             try{
@@ -115,15 +124,8 @@ public class DbManager {
 
                 result = sentence.executeQuery();
 
-                if (result != null){
-                    userArray = new ArrayList<>();
-                    Boolean state;
-
-                    while (result.next()){
-                        state = (result.getInt("state")> 0);
-
-                        userArray.add(new User(result.getString("uemail"), result.getString("uname"), null, null, state));
-                    }
+                if (result.next()){
+                    userArray = result.getString("Json");
                 }
             } catch (SQLException e) {
                 e.printStackTrace();
@@ -133,16 +135,46 @@ public class DbManager {
         return userArray;
     }
 
-    public ArrayList<Message> getMessages(ReqMessages req) {
-        // TODO Implement method "GetMessages"
-        return null;
+    /**
+     * Metodo para obtener los mensajes enviados entre un usuario y otro
+     * @param req (ReqMessages) Parametros necesarios para realizar la consulta
+     * @return (String) Devuelve una lista con los mensajes, si no se encuentra ninguno se devolvera null
+     */
+    public String getMessages(ReqMessages req){
+        if (req.getUser1() == null || req.getUser2() == null){
+            return null;
+        }
+
+        String sqlSentence = "";
+        PreparedStatement sentence = null;
+        ResultSet result = null;
+
+        String messages = null;
+
+        if (connection != null){
+            try {
+                sentence = connection.prepareStatement(sqlSentence);
+                sentence.setString(1, req.getUser1());
+                sentence.setString(2, req.getUser2());
+
+                result = sentence.executeQuery();
+
+                if (result.next()){
+                    messages = result.getString("Json");
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+
+        return messages;
     }
 
     public void updateUser(User user) {
         // TODO Implement method "UpdateUser"
     }
 
-    public User getNewUser(String email, String password) {
+    public String getNewUser(String email, String password) {
         // TODO Implement method "GetNewUser"
         return null;
     }

@@ -61,9 +61,8 @@ public class ChatSocket {
 
             System.out.println(order);
 
-            String preresponce = JsonManager.executeOrder(order);
+            String response = JsonManager.executeOrder(order);
 
-            String response = JsonManager.gson.toJson(preresponce);
             System.out.println(response);
 
             out.writeObject(response);
