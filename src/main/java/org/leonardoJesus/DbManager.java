@@ -145,7 +145,25 @@ public class DbManager {
             return null;
         }
 
-        String sqlSentence = "";
+        String sqlSentence = "select convert(\n" +
+                "\tJSON_OBJECT(\n" +
+                "\t\t\t'menssages', \n" +
+                "            COALESCE((SELECT JSON_ARRAYAGG(\n" +
+                "\t\t\t\tJSON_OBJECT(\n" +
+                "\t\t\t\t\t'sender' , sender,\n" +
+                "                    'target', target,\n" +
+                "                    'date', mdate,\n" +
+                "                    'body', body\n" +
+                "                ))\n" +
+                "                FROM messages\n" +
+                "                where (sender = 'leo.figueroa2002@gmail.com' and target = 'mario.mario@gmail')\n" +
+                "                or (sender = 'mario.mario@gmail' and target = 'leo.figueroa2002@gmail.com')\n" +
+                "                order by mdate\n" +
+                "\t\t\t), '[]'\n" +
+                "        )\n" +
+                "\t), \n" +
+                "    JSON\n" +
+                ") as 'Json';";
         PreparedStatement sentence = null;
         ResultSet result = null;
 
