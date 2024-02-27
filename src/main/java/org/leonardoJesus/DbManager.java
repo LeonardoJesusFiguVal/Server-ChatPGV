@@ -66,7 +66,6 @@ public class DbManager {
                 return null;
             }
         }
-
         return null;
     }
 
@@ -189,19 +188,106 @@ public class DbManager {
     }
 
     public void updateUser(User user) {
-        // TODO Implement method "UpdateUser"
+        if (user == null){
+            return;
+        }
+
+        String sqlSentence = "update users set uname = ?, upassword = ?, uimage = ? where uemail = ?;";
+
+        PreparedStatement sentence = null;
+
+        if (connection != null){
+            try {
+                sentence = connection.prepareStatement(sqlSentence);
+
+                sentence.setString(1, user.getName());
+                sentence.setString(2, user.getPassword());
+                sentence.setString(3, user.getImage());
+                sentence.setString(4, user.getEmail());
+
+                sentence.executeQuery();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     public String getNewUser(String email, String password) {
-        // TODO Implement method "GetNewUser"
+        if (email == null || password == null){
+            return null;
+        }
+
+        String sqlSentence = "SELECT JSON_OBJECT('email', uemail, 'name', uname, 'password', upassword, 'image', uimage ) as 'Json' from users where uemail = ? AND upassword = ?;";
+
+        PreparedStatement sentence = null;
+        ResultSet result = null;
+
+        if (connection != null){
+            try{
+
+                sentence = connection.prepareStatement(sqlSentence);
+
+                sentence.setString(1, email);
+                sentence.setString(2, password);
+
+                result = sentence.executeQuery();
+
+                if (result != null){
+                    return result.getString("Json");
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+                return null;
+            }
+        }
         return null;
     }
 
     public void postUser(User user) {
-        // TODO Implement method "PostUser"
+        if (user == null){
+            return;
+        }
+
+        String sqlCentence= "insert into users(uemail, uname, upassword, uimage) values (?, ?, ?, ?);";
+        PreparedStatement sentence= null;
+
+        if (connection != null){
+            try {
+
+                sentence = connection.prepareStatement(sqlCentence);
+
+                sentence.setString(1, user.getEmail());
+                sentence.setString(2, user.getName());
+                sentence.setString(3, user.getPassword());
+                sentence.setString(4, user.getImage());
+
+                sentence.executeQuery();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+
     }
 
     public void postMessage(Message message) {
-        // TODO Implement method "PostMessage"
+        if (message == null){
+            return;
+        }
+
+        String sqlSentence = "insert into messages(sender, target, mdate, body) values (?, ?, now(), ?);";
+
+        PreparedStatement sentence = null;
+
+        if (connection != null){
+            try {
+                sentence = connection.prepareStatement(sqlSentence);
+
+                sentence.setString(1, message.getSender());
+                sentence.setString(2, message.getTarget());
+                sentence.setString(3, message.getBody());
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
     }
 }
