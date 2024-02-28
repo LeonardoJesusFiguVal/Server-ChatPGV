@@ -7,23 +7,20 @@ public class User implements Serializable {
     private String email;
     private String name;
     private String password;
-    private boolean state;
-    private String image;
+    private int image;
 
-    public User(String email, String name, String password, String image, boolean state) {
+    public User(String email, String name, String password, int image) {
         this.email = email;
         this.name = name;
         this.password = password;
         this.image = image;
-        this.state = state;
     }
 
     public User() {
         this.email = null;
         this.name = null;
         this.password = null;
-        this.image = null;
-        this.state = false;
+        this.image = 0;
     }
 
     public String getEmail() {
@@ -50,17 +47,14 @@ public class User implements Serializable {
         this.password = password;
     }
 
-    public String getImage() {
+    public int getImage() {
         return image;
     }
 
-    public void setImage(String image) {
+    public void setImage(int image) {
         this.image = image;
     }
 
-    public void setState(boolean state){
-        this.state = state;
-    }
 
     @Override
     public String toString() {
@@ -68,7 +62,6 @@ public class User implements Serializable {
                 "email='" + email + '\'' +
                 ", name='" + name + '\'' +
                 ", password='" + password + '\'' +
-                ", state=" + state +
                 ", image='" + image + '\'' +
                 '}';
     }

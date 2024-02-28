@@ -7,11 +7,11 @@ public class Message implements Serializable {
 
     private String sender;
     private String target;
-    private SimpleDateFormat mDate;
+    private String mDate;
     private String body;
     private boolean state;
 
-    public Message(String sender, String target, SimpleDateFormat mDate, String body, boolean state) {
+    public Message(String sender, String target, String mDate, String body, boolean state) {
         this.sender = sender;
         this.target = target;
         this.mDate = mDate;
@@ -43,11 +43,11 @@ public class Message implements Serializable {
         this.target = target;
     }
 
-    public SimpleDateFormat getmDate() {
+    public String getmDate() {
         return mDate;
     }
 
-    public void setmDate(SimpleDateFormat mDate) {
+    public void setmDate(String mDate) {
         this.mDate = mDate;
     }
 

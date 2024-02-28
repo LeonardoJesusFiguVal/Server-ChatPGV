@@ -1,13 +1,21 @@
 package org.leonardoJesus;
 
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import org.json.JSONArray;
 import org.leonardoJesus.models.requests.get.ReqMessages;
 import org.leonardoJesus.models.requests.get.ReqUsers;
 import org.leonardoJesus.models.requests.get.ReqVerification;
 import org.leonardoJesus.models.responces.objects.Message;
 import org.leonardoJesus.models.responces.objects.User;
 
+import java.io.IOException;
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 public class DbManager {
 
@@ -144,47 +152,49 @@ public class DbManager {
             return null;
         }
 
-        String sqlSentence = "select convert(\n" +
-                "\tJSON_OBJECT(\n" +
-                "\t\t\t'menssages', \n" +
-                "            COALESCE((SELECT JSON_ARRAYAGG(\n" +
-                "\t\t\t\tJSON_OBJECT(\n" +
-                "\t\t\t\t\t'sender' , sender,\n" +
-                "                    'target', target,\n" +
-                "                    'date', mdate,\n" +
-                "                    'body', body\n" +
-                "                ))\n" +
-                "                FROM messages\n" +
-                "                where (sender = 'leo.figueroa2002@gmail.com' and target = 'mario.mario@gmail')\n" +
-                "                or (sender = 'mario.mario@gmail' and target = 'leo.figueroa2002@gmail.com')\n" +
-                "                order by mdate\n" +
-                "\t\t\t), '[]'\n" +
-                "        )\n" +
-                "\t), \n" +
-                "    JSON\n" +
-                ") as 'Json';";
+//        String sqlSentence = "select convert(COALESCE((SELECT JSON_ARRAYAGG(\n" +
+//                "\tJSON_OBJECT(\n" +
+//                "\t\t'sender' , sender,\n" +
+//                "        'target', target,\n" +
+//                "        'date', mdate,\n" +
+//                "        'body', body\n" +
+//                "        ))\n" +
+//                "FROM messages \n" +
+//                "where (sender = ?) and (target = ?) or (sender = ?) and (target = ?) order by mdate)\n" +
+//                ", '[]'), JSON) AS 'Json';";
+
+        String sqlSentence = "Select JSON_ARRAYAGG(JSON_OBJECT(" +
+                "'sender' , sender," +
+                "'target', target," +
+                "'date', mdate," +
+                "'body', body)) Json FROM messages where (sender = ?) and (target = ?) or (sender = ?) and (target = ?) order by mdate";
         PreparedStatement sentence = null;
         ResultSet result = null;
-
-        String messages = null;
 
         if (connection != null){
             try {
                 sentence = connection.prepareStatement(sqlSentence);
                 sentence.setString(1, req.getUser1());
                 sentence.setString(2, req.getUser2());
+                sentence.setString(3, req.getUser2());
+                sentence.setString(4, req.getUser1());
 
                 result = sentence.executeQuery();
 
                 if (result.next()){
-                    messages = result.getString("Json");
+
+                    JSONArray jsonArray = new JSONArray(result.getString("Json"));
+
+                    System.out.println(jsonArray);
+
+                    return jsonArray.toString();
                 }
             } catch (SQLException e) {
                 e.printStackTrace();
             }
         }
 
-        return messages;
+        return null;
     }
 
     public void updateUser(User user) {
@@ -202,10 +212,10 @@ public class DbManager {
 
                 sentence.setString(1, user.getName());
                 sentence.setString(2, user.getPassword());
-                sentence.setString(3, user.getImage());
+                sentence.setInt(3, user.getImage());
                 sentence.setString(4, user.getEmail());
 
-                sentence.executeQuery();
+                sentence.execute();
             } catch (SQLException e) {
                 e.printStackTrace();
             }
@@ -259,9 +269,9 @@ public class DbManager {
                 sentence.setString(1, user.getEmail());
                 sentence.setString(2, user.getName());
                 sentence.setString(3, user.getPassword());
-                sentence.setString(4, user.getImage());
+                sentence.setInt(4, user.getImage());
 
-                sentence.executeQuery();
+                sentence.execute();
             } catch (SQLException e) {
                 e.printStackTrace();
             }
@@ -285,6 +295,8 @@ public class DbManager {
                 sentence.setString(1, message.getSender());
                 sentence.setString(2, message.getTarget());
                 sentence.setString(3, message.getBody());
+
+                sentence.execute();
             } catch (SQLException e) {
                 e.printStackTrace();
             }
